@@ -19,9 +19,27 @@ bool BigReal::isValidReal(string realNumber)
                 return false;
             }   
         }
-            return true;
+        return true;
     }
     return false;
+}
+
+BigReal::BigReal(double realNumber)
+{
+    string real_number_str = to_string(realNumber);
+    setNum(real_number_str);
+}
+
+BigReal::BigReal(string realNumber)
+{
+    setNum(realNumber);
+}
+
+BigReal::BigReal(const BigReal &other)
+{
+    this->digits_d = other.digits_d;
+    this->digits_r = other.digits_r;
+    this->sign = other.sign;
 }
 
 void BigReal::setNum(string realNumber)

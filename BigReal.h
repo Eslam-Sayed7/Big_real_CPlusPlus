@@ -17,9 +17,9 @@ private:
     char sign;
 
 public:
-    //BigReal(double realNumber = 0.0); // Default constructor
-    //BigReal(string realNumber);       // Initialize from string
-    //BigReal(const BigReal &other);    // Copy constructor
+    BigReal(double realNumber = 0.0); // Default constructor
+    BigReal(string realNumber);       // Initialize from string
+    BigReal(const BigReal &other);    // Copy constructor
 
     void setNum(string realNumber);
     int size();
