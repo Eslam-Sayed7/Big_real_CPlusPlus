@@ -104,7 +104,7 @@ int BigReal::SIZE()
     return (digits_d.size() + digits_r.size());
 }
 
-BigReal &BigReal::operator=(BigReal &other)
+BigReal BigReal::operator=(BigReal other)
 {
     if (this == &other)
         return *this;
@@ -191,4 +191,43 @@ ostream &operator<<(ostream &out, BigReal num)
         out << num.digits_d[i];
     }
     return out;
+}
+BigReal BigReal::operator+(BigReal &other) {
+    BigReal res;
+
+    fill_zeros(other);
+
+    if (sign != other.sign) {
+        if (other.sign == '-')
+            ninesComplemet(other);
+        else
+            ninesComplemet(*this);
+
+        res = this->add(other);
+        if (this->SIZE() == res.SIZE()) {
+            ninesComplemet(res);
+            res.sign = '-';
+        } else {
+            res.digits_r.resize(res.digits_r.size() - 1);
+            BigReal tmp;
+            tmp.setNum(digits_d.empty() && other.digits_d.empty() ? "+1" : "+.1");
+            res = res.add(tmp);
+            res.sign = '+';
+        }
+        while (res.digits_r.back() == 0 && res.digits_r.size() > 1) {
+            res.digits_r.pop_back();
+        }
+    } else {
+        res = this->add(other);
+        res.sign = sign;
+    }
+
+    return res;
+}
+BigReal BigReal::operator-(BigReal &other) {
+    if (other.sign == '+')
+        other.sign = '-';
+    else
+        other.sign = '+';
+    return *this + other;
 }
