@@ -42,6 +42,29 @@ BigReal::BigReal(const BigReal &other)
     this->sign = other.sign;
 }
 
+BigReal BigReal::compare_two_values(BigReal num1, BigReal num2)
+{
+    if (num1.digits_r.size() < num2.digits_r.size())
+        return num1;
+    else if (num1.digits_r.size() > num2.digits_r.size())
+        return num2;
+    
+    if (num1.digits_d.size() < num2.digits_d.size())
+        return num1;
+    else if (num1.digits_d.size() > num2.digits_d.size())
+        return num2;
+    
+    for (int i = num1.digits_r.size()-1 ; i >= 0 ;--i)
+        if (num1.digits_r[i] > num2.digits_r[i])
+            return num2;
+    
+    for (int i = num1.digits_d.size()-1 ; i >= 0 ;--i)
+        if (num1.digits_d[i] > num2.digits_d[i])
+            return num2;
+    
+    return num1;
+}
+
 void BigReal::setNum(string realNumber)
 {
     if(!isValidReal(realNumber))
@@ -76,18 +99,96 @@ void BigReal::setNum(string realNumber)
         digits_r.pop_back();
 }
 
-void BigReal::print_num()
+int BigReal::SIZE()
 {
-    reverse(digits_d.begin(), digits_d.end());
-    reverse(digits_r.begin(), digits_r.end());
+    return (digits_d.size() + digits_r.size());
+}
 
-    cout << sign;
-    for (int num: digits_r)
-        cout << num;
+BigReal &BigReal::operator=(BigReal &other)
+{
+    if (this == &other)
+        return *this;
+    this->digits_r.clear();    
+    this->digits_d.clear();
     
-    cout << '.';
+    this->sign = other.sign;
 
-    for (int num: digits_d)
-        cout << num;
+    for (int i = 0; i < other.digits_r.size(); ++i)
+        digits_r.push_back(other.digits_r[i]);
+
+    for (int i = 0; i < other.digits_d.size(); ++i)
+        digits_d.push_back(other.digits_d[i]);
+
+    return *this;
+}
+
+bool BigReal::operator<(BigReal anotherReal)
+{
+    if (sign == '+' && anotherReal.sign == '-')
+        return false;
+    else if (sign == '-' && anotherReal.sign == '+')
+        return true;
+
+    if (*this == anotherReal)
+        return false;
     
+    if (compare_two_values(*this, anotherReal) == *this)   // the value of *this is smallest
+    {
+        if (sign == '+')
+            return true;
+        else
+            return false;
+    }
+    else   // the value of anotherReal is smallest
+    {
+        if (sign == '+')
+            return false;
+        else
+            return true;
+    } 
+
+    return true;
+}
+
+bool BigReal::operator>(BigReal anotherReal)
+{
+    if (*this < anotherReal || *this == anotherReal)
+        return false;
+    return true;
+}
+
+bool BigReal::operator==(BigReal anotherReal)
+{
+    if (sign != anotherReal.sign)
+        return false;
+    if (digits_r.size() != anotherReal.digits_r.size())
+        return false;
+    if (digits_d.size() != anotherReal.digits_d.size())
+        return false;
+
+    for (int i = 0 ; i < digits_r.size() ; ++i)
+        if (digits_r[i] != anotherReal.digits_r[i])
+            return false;
+    
+    for (int i = 0 ; i < digits_d.size() ; ++i)
+        if (digits_d[i] != anotherReal.digits_d[i])
+            return false;
+    
+    return true;
+}
+
+ostream &operator<<(ostream &out, BigReal num)
+{
+    if (num.sign == '-')
+        out << '-';
+    
+    for (int i = num.digits_r.size()-1 ; i >= 0; --i)
+        out << num.digits_r[i];
+    for (int i = num.digits_d.size()-1 ; i >= 0; --i)
+    {
+        if (i == num.digits_d.size()-1)
+            out << '.';
+        out << num.digits_d[i];
+    }
+    return out;
 }
