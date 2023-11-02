@@ -65,6 +65,7 @@ void BigReal::ninesComplemet(BigReal &b) {
 BigReal BigReal::add(BigReal other) {
     int maxSize = max(digits_d.size(), other.digits_d.size());
     BigReal res;
+    res.digits_r.pop_back();
     int carry = 0;
     for (int i = 0; i < maxSize; ++i) {
         int sum = carry;
@@ -110,6 +111,21 @@ BigReal BigReal::compare_two_values(BigReal num1, BigReal num2)
             return num2;
     
     return num1;
+}
+
+void BigReal::remove_zeros()
+{
+    while(digits_r.size() >= 1 && digits_r.back() == 0)
+        digits_r.pop_back();
+    
+    reverse(digits_d.begin(), digits_d.end());
+
+    while(!digits_d.empty() && digits_d.back() == 0)
+        digits_d.pop_back();
+    
+    reverse(digits_d.begin(), digits_d.end());
+    if (digits_r.empty())
+        digits_r.push_back(0);
 }
 
 // Constructor Function
@@ -160,19 +176,11 @@ void BigReal::setNum(string realNumber)
             digits_d.push_back(digit);
         else
             digits_r.push_back(digit);
-    }
-
-    while(!digits_d.empty() && digits_d.back() == 0)
-        digits_d.pop_back();
-    
+    }    
     reverse(digits_d.begin(), digits_d.end());     
     reverse(digits_r.begin(), digits_r.end());     
-    
-    while(!digits_r.empty() && digits_r.back() == 0)
-        digits_r.pop_back();
 
-    if (digits_r.empty())
-        digits_r.push_back(0); 
+    remove_zeros();
 }
 
 int BigReal::SIZE()
@@ -203,15 +211,13 @@ BigReal BigReal::operator+(BigReal &other) {
             res = res.add(tmp);
             res.sign = '+';
         }
-        while (res.digits_r.back() == 0 && res.digits_r.size() > 1) {
-            res.digits_r.pop_back();
-        }
+
     } else {
         res = this->add(other);
         res.sign = sign;
     }
 
-
+    res.remove_zeros();
     return res;
 }
 BigReal BigReal::operator-(BigReal &other) {
@@ -219,6 +225,7 @@ BigReal BigReal::operator-(BigReal &other) {
         other.sign = '-';
     else
         other.sign = '+';
+        
     return *this + other;
 }
 
@@ -299,7 +306,7 @@ bool BigReal::operator==(BigReal anotherReal)
 // printing operator
 ostream &operator<<(ostream &out, BigReal num)
 {
-    if (num.digits_d.empty() && num.digits_r[0] == 0 && num.digits_r.size() == 1)
+    if (num.digits_d.empty() && num.digits_r.size() == 1 && num.digits_r[0] == 0)
     {
         out << 0;
         return out;
