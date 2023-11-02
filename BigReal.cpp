@@ -11,7 +11,8 @@ bool BigReal::isValidReal(string realNumber)
         
         // handling 1st digit to equal (number or dot or a sign(+ or -))
     if (realNumber[0] == '+' || realNumber[0] == '-' || realNumber[0] == '.' || (realNumber[0] >= '0' && realNumber[0] <= '9')  ) { 
-        
+        if(realNumber[0] == '.'){one_decimal_dot = true;}
+
         for (int i = 1; i < realNumber.size(); i++) { // checking number digits after sign bit (if exist)
             if ((realNumber[i] <='9' && realNumber[i] >= '0')) {
                 continue;
