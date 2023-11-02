@@ -1,6 +1,6 @@
 #include <iostream>
 #include <algorithm>
-#include <vector>
+#include <cassert>
 #include "BigReal.h"
 
 // Utilities Function
@@ -147,36 +147,39 @@ BigReal::BigReal(const BigReal &other)
 
 void BigReal::setNum(string realNumber)
 {
-    if(!isValidReal(realNumber))
-    {
-        cout << "this number is not valid. Try again!!\n";
-        return;
-    }
+    assert(isValidReal(realNumber));
+    sign = '+';
+    int start = 0;
+    if (realNumber[0] == '-' || realNumber[0] == '+')
+        sign = realNumber[0], start = 1;
 
-    // make sure that it is clear before filling digits
-    digits_d.clear(); 
-    digits_r.clear();
-    sign = realNumber[0];
-    bool flag = false;
-    
-    for (int idx = realNumber.size()-1; idx >= 1  ; --idx)
+    bool has_dot = false;
+    for (int i = start ; i < realNumber.size() ; ++i)
     {
-        if (realNumber[idx] == '.')
+        if (realNumber[i] == '.')
         {
-            flag = true;
+            has_dot = true;
             continue;
         }
 
-        int digit = realNumber[idx] - '0';
-
-        if (!flag)
+        int digit = realNumber[i] - '0';
+        if (has_dot)
             digits_d.push_back(digit);
         else
             digits_r.push_back(digit);
     }
+
+    while(!digits_d.empty() && digits_d.back() == 0)
+        digits_d.pop_back();
+    
+    reverse(digits_d.begin(), digits_d.end());     
+    reverse(digits_r.begin(), digits_r.end());     
     
     while(!digits_r.empty() && digits_r.back() == 0)
         digits_r.pop_back();
+
+    if (digits_r.empty())
+        digits_r.push_back(0); 
 }
 
 int BigReal::SIZE()
@@ -306,6 +309,12 @@ bool BigReal::operator==(BigReal anotherReal)
 
 ostream &operator<<(ostream &out, BigReal num)
 {
+    if (num.digits_d.empty() && num.digits_r[0] == 0)
+    {
+        out << 0;
+        return out;
+    }
+    
     if (num.sign == '-')
         out << '-';
     
