@@ -7,7 +7,7 @@
 
 bool BigReal::isValidReal(string realNumber)
 {
-    bool one_decimal_dot{false}; // flag to catch if more than one dot
+    bool one_decimal_dot =false; // flag to catch if more than one dot
         
         // handling 1st digit to equal (number or dot or a sign(+ or -))
     if (realNumber[0] == '+' || realNumber[0] == '-' || realNumber[0] == '.' || (realNumber[0] >= '0' && realNumber[0] <= '9')  ) { 
@@ -25,9 +25,8 @@ bool BigReal::isValidReal(string realNumber)
     }
     return false;
 }
+void BigReal::fill_zeros(BigReal&other) {
 
-void BigReal::fill_zeros(BigReal &other)
-{
     int maxSize = max(digits_d.size(), other.digits_d.size());
     int minSize = min(digits_d.size(), other.digits_d.size());
 
@@ -37,6 +36,7 @@ void BigReal::fill_zeros(BigReal &other)
         other.digits_d.insert(other.digits_d.begin(), numZeros, 0);
     else if (other.digits_d.size() > digits_d.size())
         digits_d.insert(digits_d.begin(), numZeros, 0);
+
 
     maxSize = max(digits_r.size(), other.digits_r.size());
     minSize = min(digits_r.size(), other.digits_r.size());
@@ -50,53 +50,42 @@ void BigReal::fill_zeros(BigReal &other)
         while (numZeros--)
             digits_r.push_back(0);
     }
-}
 
-void BigReal::ninesComplemet(BigReal &b)
-{
+}
+void BigReal::ninesComplemet(BigReal &b) {
     for (int i = 0; i < b.digits_r.size(); ++i) {
         b.digits_r[i] = 9 - b.digits_r[i];
     }
     for (int i = 0; i < b.digits_d.size(); ++i) {
         b.digits_d[i] = 9 - b.digits_d[i];
+
     }
 }
 
-BigReal BigReal::add(BigReal other)
-{
+BigReal BigReal::add(BigReal other) {
     int maxSize = max(digits_d.size(), other.digits_d.size());
     BigReal res;
     int carry = 0;
-
     for (int i = 0; i < maxSize; ++i) {
         int sum = carry;
-
         if (i < digits_d.size())
             sum += digits_d[i];
         if (i < other.digits_d.size())
             sum += other.digits_d[i];
-        
         res.digits_d.push_back(sum % 10);
         carry = sum / 10;
     }
-    
     maxSize = max(digits_r.size(), other.digits_r.size());
-    
     for (int i = 0; i < maxSize; ++i) {
         int sum = carry;
-
         if (i < digits_r.size())
             sum += digits_r[i];
         if (i < other.digits_r.size())
             sum += other.digits_r[i];
-
         res.digits_r.push_back(sum % 10);
         carry = sum / 10;
     }
-    
-    if (carry != 0) 
-        res.digits_r.push_back(carry);
-    
+    if (carry != 0) res.digits_r.push_back(carry);
     return res;
 }
 
@@ -195,7 +184,6 @@ int BigReal::SIZE()
 
 BigReal BigReal::operator+(BigReal &other) {
     BigReal res;
-
     fill_zeros(other);
 
     if (sign != other.sign) {
@@ -215,17 +203,17 @@ BigReal BigReal::operator+(BigReal &other) {
             res = res.add(tmp);
             res.sign = '+';
         }
-        while (res.digits_r.back() == 0 && res.digits_r.size() > 1) {
+        while (res.digits_r.back() == 0 && res.digits_r.size() > 1)
             res.digits_r.pop_back();
-        }
+
     } else {
         res = this->add(other);
         res.sign = sign;
     }
 
+
     return res;
 }
-
 BigReal BigReal::operator-(BigReal &other) {
     if (other.sign == '+')
         other.sign = '-';
@@ -234,13 +222,13 @@ BigReal BigReal::operator-(BigReal &other) {
     return *this + other;
 }
 
-BigReal BigReal::operator=(BigReal other)
-{
+
+BigReal BigReal::operator=(BigReal other) {
     if (this == &other)
         return *this;
-    this->digits_r.clear();    
+    this->digits_r.clear();
     this->digits_d.clear();
-    
+
     this->sign = other.sign;
 
     for (int i = 0; i < other.digits_r.size(); ++i)
@@ -251,7 +239,6 @@ BigReal BigReal::operator=(BigReal other)
 
     return *this;
 }
-
 // comparison operators (<, >, ==)
 
 bool BigReal::operator<(BigReal anotherReal)
