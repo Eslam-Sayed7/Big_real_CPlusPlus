@@ -199,13 +199,13 @@ BigReal BigReal::operator+(BigReal &other) {
         } else {
             res.digits_r.resize(res.digits_r.size() - 1);
             BigReal tmp;
-            tmp.setNum(digits_d.empty() && other.digits_d.empty() ? "+1" : "+.1");
+            tmp.setNum(res.digits_d.empty() ? "+1" : "+.1");
             res = res.add(tmp);
             res.sign = '+';
         }
-        while (res.digits_r.back() == 0 && res.digits_r.size() > 1)
+        while (res.digits_r.back() == 0 && res.digits_r.size() > 1) {
             res.digits_r.pop_back();
-
+        }
     } else {
         res = this->add(other);
         res.sign = sign;
@@ -297,10 +297,9 @@ bool BigReal::operator==(BigReal anotherReal)
 }
 
 // printing operator
-
 ostream &operator<<(ostream &out, BigReal num)
 {
-    if (num.digits_d.empty() && num.digits_r[0] == 0)
+    if (num.digits_d.empty() && num.digits_r[0] == 0 && num.digits_r.size() == 1)
     {
         out << 0;
         return out;
