@@ -7,7 +7,7 @@
 
 bool BigReal::isValidReal(string realNumber)
 {
-    bool one_decimal_dot = false; // flag to catch if more than one dot
+    bool one_decimal_dot{false}; // flag to catch if more than one dot
         
         // handling 1st digit to equal (number or dot or a sign(+ or -))
     if (realNumber[0] == '+' || realNumber[0] == '-' || realNumber[0] == '.' || (realNumber[0] >= '0' && realNumber[0] <= '9')  ) { 
@@ -26,7 +26,7 @@ bool BigReal::isValidReal(string realNumber)
     return false;
 }
 
-void BigReal::fill_zeros(BigReal &other) // fill digits_d & digits_r zeros
+void BigReal::fill_zeros(BigReal &other)
 {
     int maxSize = max(digits_d.size(), other.digits_d.size());
     int minSize = min(digits_d.size(), other.digits_d.size());
@@ -148,6 +148,10 @@ BigReal::BigReal(const BigReal &other)
 void BigReal::setNum(string realNumber)
 {
     assert(isValidReal(realNumber));
+    
+    digits_d.clear();
+    digits_r.clear();
+    
     sign = '+';
     int start = 0;
     if (realNumber[0] == '-' || realNumber[0] == '+')
@@ -207,7 +211,7 @@ BigReal BigReal::operator+(BigReal &other) {
         } else {
             res.digits_r.resize(res.digits_r.size() - 1);
             BigReal tmp;
-            tmp.setNum(res.digits_d.empty() ? "+1" : "+.1");
+            tmp.setNum(digits_d.empty() && other.digits_d.empty() ? "+1" : "+.1");
             res = res.add(tmp);
             res.sign = '+';
         }
