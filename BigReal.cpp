@@ -3,6 +3,8 @@
 #include <vector>
 #include "BigReal.h"
 
+// Utilities Function
+
 bool BigReal::isValidReal(string realNumber)
 {
     bool one_decimal_dot{false}; // flag to catch if more than one dot
@@ -24,22 +26,78 @@ bool BigReal::isValidReal(string realNumber)
     return false;
 }
 
-BigReal::BigReal(double realNumber)
+void BigReal::fill_zeros(BigReal &other)
 {
-    string real_number_str = to_string(realNumber);
-    setNum(real_number_str);
+    int maxSize = max(digits_d.size(), other.digits_d.size());
+    int minSize = min(digits_d.size(), other.digits_d.size());
+
+    int numZeros = maxSize - minSize;
+
+    if (other.digits_d.size() < digits_d.size())
+        other.digits_d.insert(other.digits_d.begin(), numZeros, 0);
+    else if (other.digits_d.size() > digits_d.size())
+        digits_d.insert(digits_d.begin(), numZeros, 0);
+
+    maxSize = max(digits_r.size(), other.digits_r.size());
+    minSize = min(digits_r.size(), other.digits_r.size());
+    numZeros = maxSize - minSize;
+
+    if (other.digits_r.size() < digits_r.size()) {
+        while (numZeros--)
+            other.digits_r.push_back(0);
+
+    } else if (other.digits_r.size() > digits_r.size()) {
+        while (numZeros--)
+            digits_r.push_back(0);
+    }
 }
 
-BigReal::BigReal(string realNumber)
+void BigReal::ninesComplemet(BigReal &b)
 {
-    setNum(realNumber);
+    for (int i = 0; i < b.digits_r.size(); ++i) {
+        b.digits_r[i] = 9 - b.digits_r[i];
+    }
+    for (int i = 0; i < b.digits_d.size(); ++i) {
+        b.digits_d[i] = 9 - b.digits_d[i];
+    }
 }
 
-BigReal::BigReal(const BigReal &other)
+BigReal BigReal::add(BigReal other)
 {
-    this->digits_d = other.digits_d;
-    this->digits_r = other.digits_r;
-    this->sign = other.sign;
+    int maxSize = max(digits_d.size(), other.digits_d.size());
+    BigReal res;
+    int carry = 0;
+
+    for (int i = 0; i < maxSize; ++i) {
+        int sum = carry;
+
+        if (i < digits_d.size())
+            sum += digits_d[i];
+        if (i < other.digits_d.size())
+            sum += other.digits_d[i];
+        
+        res.digits_d.push_back(sum % 10);
+        carry = sum / 10;
+    }
+    
+    maxSize = max(digits_r.size(), other.digits_r.size());
+    
+    for (int i = 0; i < maxSize; ++i) {
+        int sum = carry;
+
+        if (i < digits_r.size())
+            sum += digits_r[i];
+        if (i < other.digits_r.size())
+            sum += other.digits_r[i];
+
+        res.digits_r.push_back(sum % 10);
+        carry = sum / 10;
+    }
+    
+    if (carry != 0) 
+        res.digits_r.push_back(carry);
+    
+    return res;
 }
 
 BigReal BigReal::compare_two_values(BigReal num1, BigReal num2)
@@ -64,6 +122,28 @@ BigReal BigReal::compare_two_values(BigReal num1, BigReal num2)
     
     return num1;
 }
+
+// Constructor Function
+
+BigReal::BigReal(double realNumber)
+{
+    string real_number_str = to_string(realNumber);
+    setNum(real_number_str);
+}
+
+BigReal::BigReal(string realNumber)
+{
+    setNum(realNumber);
+}
+
+BigReal::BigReal(const BigReal &other)
+{
+    this->digits_d = other.digits_d;
+    this->digits_r = other.digits_r;
+    this->sign = other.sign;
+}
+
+// setNum & SIZE Function
 
 void BigReal::setNum(string realNumber)
 {
@@ -104,6 +184,49 @@ int BigReal::SIZE()
     return (digits_d.size() + digits_r.size());
 }
 
+// Operators (+, -, =)
+
+BigReal BigReal::operator+(BigReal &other) {
+    BigReal res;
+
+    fill_zeros(other);
+
+    if (sign != other.sign) {
+        if (other.sign == '-')
+            ninesComplemet(other);
+        else
+            ninesComplemet(*this);
+
+        res = this->add(other);
+        if (this->SIZE() == res.SIZE()) {
+            ninesComplemet(res);
+            res.sign = '-';
+        } else {
+            res.digits_r.resize(res.digits_r.size() - 1);
+            BigReal tmp;
+            tmp.setNum(digits_d.empty() && other.digits_d.empty() ? "+1" : "+.1");
+            res = res.add(tmp);
+            res.sign = '+';
+        }
+        while (res.digits_r.back() == 0 && res.digits_r.size() > 1) {
+            res.digits_r.pop_back();
+        }
+    } else {
+        res = this->add(other);
+        res.sign = sign;
+    }
+
+    return res;
+}
+
+BigReal BigReal::operator-(BigReal &other) {
+    if (other.sign == '+')
+        other.sign = '-';
+    else
+        other.sign = '+';
+    return *this + other;
+}
+
 BigReal BigReal::operator=(BigReal other)
 {
     if (this == &other)
@@ -121,6 +244,8 @@ BigReal BigReal::operator=(BigReal other)
 
     return *this;
 }
+
+// comparison operators (<, >, ==)
 
 bool BigReal::operator<(BigReal anotherReal)
 {
@@ -177,6 +302,8 @@ bool BigReal::operator==(BigReal anotherReal)
     return true;
 }
 
+// printing operator
+
 ostream &operator<<(ostream &out, BigReal num)
 {
     if (num.sign == '-')
@@ -191,43 +318,4 @@ ostream &operator<<(ostream &out, BigReal num)
         out << num.digits_d[i];
     }
     return out;
-}
-BigReal BigReal::operator+(BigReal &other) {
-    BigReal res;
-
-    fill_zeros(other);
-
-    if (sign != other.sign) {
-        if (other.sign == '-')
-            ninesComplemet(other);
-        else
-            ninesComplemet(*this);
-
-        res = this->add(other);
-        if (this->SIZE() == res.SIZE()) {
-            ninesComplemet(res);
-            res.sign = '-';
-        } else {
-            res.digits_r.resize(res.digits_r.size() - 1);
-            BigReal tmp;
-            tmp.setNum(digits_d.empty() && other.digits_d.empty() ? "+1" : "+.1");
-            res = res.add(tmp);
-            res.sign = '+';
-        }
-        while (res.digits_r.back() == 0 && res.digits_r.size() > 1) {
-            res.digits_r.pop_back();
-        }
-    } else {
-        res = this->add(other);
-        res.sign = sign;
-    }
-
-    return res;
-}
-BigReal BigReal::operator-(BigReal &other) {
-    if (other.sign == '+')
-        other.sign = '-';
-    else
-        other.sign = '+';
-    return *this + other;
 }
