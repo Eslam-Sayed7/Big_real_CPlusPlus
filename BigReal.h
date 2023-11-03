@@ -20,6 +20,7 @@ private:
     void ninesComplemet(BigReal &b);
     BigReal add(BigReal other);
     BigReal compare_two_values(BigReal num1, BigReal num2);
+    void remove_zeros();
 
 public:
     BigReal(double realNumber = 0.0); 
