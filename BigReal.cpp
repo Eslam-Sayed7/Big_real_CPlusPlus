@@ -7,7 +7,7 @@
 
 bool BigReal::isValidReal(string realNumber)
 {
-    bool one_decimal_dot{false}; // flag to catch if more than one dot
+    bool one_decimal_dot= false; // flag to catch if more than one dot
         
         // handling 1st digit to equal (number or dot or a sign(+ or -))
     if (realNumber[0] == '+' || realNumber[0] == '-' || realNumber[0] == '.' || (realNumber[0] >= '0' && realNumber[0] <= '9')  ) { 
@@ -222,11 +222,9 @@ BigReal BigReal::operator+(BigReal &other) {
     return res;
 }
 BigReal BigReal::operator-(BigReal &other) {
-    if (other.sign == '+')
-        other.sign = '-';
-    else
-        other.sign = '+';
-        
+
+    other.sign = (other.sign == '-') ? '+' : '-';
+
     return *this + other;
 }
 
